@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+android/build/
+android/.gradle/
+*.apk
+
+# IDE files
+.idea/
+*.iml
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env

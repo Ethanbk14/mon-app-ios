@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VaseFlow Ultimate Celebration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+    <div class="app-container">
+        <header class="glass-card header-main">
+            <div class="header-left">
+                <h2 id="currentDate">-- -- ----</h2>
+                <p id="currentWeekRange">-- au --</p>
+            </div>
+            <div class="streak-badge" onclick="openStreakDashboard()">
+                <span id="streakCount">0</span> <span class="flame">🔥</span>
+            </div>
+        </header>
+
+        <nav class="pill-nav">
+            <button onclick="switchView('main')" class="nav-item active" id="navMain">🏺 Vases</button>
+            <button onclick="switchView('calendar')" class="nav-item" id="navCalendar">📅 Plan</button>
+            <button onclick="switchView('settings')" class="nav-item" id="navSettings">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </nav>
+
+        <section id="view-main" class="view">
+            <div class="scale-selector pill-nav" style="background: var(--card);">
+                <button onclick="setScale('daily')" id="scaleDaily" class="nav-item active">JOUR</button>
+                <button onclick="setScale('weekly')" id="scaleWeekly" class="nav-item">SEMAINE</button>
+            </div>
+            <div id="vasesGrid" class="vases-grid"></div>
+        </section>
+
+        <section id="view-calendar" class="view" style="display:none;">
+            <div class="glass-card">
+                <div class="calendar-header">
+                    <h3 class="section-title">Planning</h3>
+                    <select id="calendarUnit" onchange="renderCalendar()" class="unit-select">
+                        <option value="h">Heures</option>
+                        <option value="min">Minutes</option>
+                    </select>
+                </div>
+                <div class="week-toggle-container pill-nav" style="background: rgba(0,0,0,0.15);">
+                    <button onclick="setCalendarWeek(false)" id="btnThisWeek" class="nav-item active">Actuelle</button>
+                    <button onclick="setCalendarWeek(true)" id="btnNextWeek" class="nav-item">Suivante</button>
+                </div>
+                <div id="calendarGrid" class="calendar-list"></div>
+                <button class="action-btn add" onclick="saveCalendarBatch()">Enregistrer</button>
+            </div>
+        </section>
+
+        <section id="view-settings" class="view" style="display:none;">
+            <div class="glass-card theme-row">
+                <span>Mode Lumineux</span>
+                <label class="switch"><input type="checkbox" id="themeSwitch" onchange="toggleTheme()"><span class="slider"></span></label>
+            </div>
+            <div id="editList"></div>
+            <button class="action-btn add" onclick="addNewVase()">+ Nouveau Vase</button>
+            <div id="notifList" style="margin-top:20px;"></div>
+            <button class="action-btn alert" onclick="addNotifTime()">+ Rappel Notification</button>
+        </section>
+    </div>
+
+    <div id="streakModal" class="modal"><div class="modal-content"><h3>🔥 Le Flammarium</h3><div id="streakList" class="streak-scroll"></div><button class="btn-primary" style="margin-top:20px" onclick="closeStreakDashboard()">Fermer</button></div></div>
+    <div id="timeModal" class="modal"><div class="modal-content"><h3 id="modalVaseName">Vase</h3><div id="modalContextBadge" class="context-badge">JOUR</div><div class="input-block"><label>Temps (Remplir)</label><div class="dual-input"><input type="number" id="timeValueInput" placeholder="0" inputmode="decimal"><select id="timeUnitInput"><option value="min">min</option><option value="h">h</option></select></div></div><div class="input-block"><label>Cible (Objectif)</label><div class="dual-input"><input type="number" id="targetValueInput" placeholder="0" inputmode="decimal"><span class="unit-label">min</span></div></div><div class="modal-btns"><button class="btn-secondary" onclick="closeModal()">Annuler</button><button class="btn-primary" onclick="saveTime()">Appliquer</button></div></div></div>
+    <div id="overflowModal" class="modal"><div class="modal-content" style="border-color: #f1c40f;"><h3>Félicitations ! 🌈</h3><p id="overflowMsg"></p><button class="btn-primary" onclick="closeOverflowModal()">C'est noté !</button></div></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

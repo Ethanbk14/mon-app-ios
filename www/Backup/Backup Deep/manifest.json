@@ -1,0 +1,15 @@
+{
+  "short_name": "Tracker",
+  "name": "Mon Monitoring Semaine",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f4f4f9",
+  "theme_color": "#4CAF50",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}

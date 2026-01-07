@@ -1,0 +1,9 @@
+{
+  "appId": "com.ethan.tracker",
+  "appName": "Mon Tracker",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "ios": {
+    "minVersion": "13.0"
+  }
+}

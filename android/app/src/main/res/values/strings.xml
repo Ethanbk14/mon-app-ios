@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mon Tracker</string>
+    <string name="title_activity_main">Mon Tracker</string>
+    <string name="package_name">com.ethan.tracker</string>
+    <string name="custom_url_scheme">com.ethan.tracker</string>
+</resources>
