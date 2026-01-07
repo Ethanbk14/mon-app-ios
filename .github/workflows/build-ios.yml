@@ -12,40 +12,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        
-    - name: Install dependencies
+    - name: List files
       run: |
-        npm install
-        npm install @capacitor/ios
+        echo "Contenu du dépôt :"
+        ls -la
+        echo ""
+        echo "Contenu de www (s'il existe) :"
+        ls -la www/ 2>/dev/null || echo "Dossier www non trouvé"
         
-    - name: Prepare web app
+    - name: Create simple IPA
       run: |
-        # Vérifier que www existe
-        if [ ! -d "www" ]; then
-          echo "ERREUR: Dossier www non trouvé!"
+        # Créer la structure de base
+        mkdir -p Payload/MyApp.app
+        
+        # Vérifier que www existe et le copier
+        if [ -d "www" ]; then
+          echo "Copie des fichiers depuis www/"
+          cp -r www/* Payload/MyApp.app/
+        else
+          echo "ERREUR: Aucun dossier www trouvé !"
+          echo "Fichiers disponibles :"
           ls -la
           exit 1
         fi
-        echo "Dossier www trouvé avec:"
-        ls -la www/
         
-    - name: Build iOS project
-      run: |
-        npx cap add ios
-        npx cap sync ios
-        
-    - name: Create IPA file
-      run: |
-        cd ios/App
-        # Créer une structure d'application iOS
-        mkdir -p Payload/App.app
-        
-        # Créer le fichier Info.plist
-        cat > Payload/App.app/Info.plist << 'EOF'
+        # Créer le fichier Info.plist minimal
+        cat > Payload/MyApp.app/Info.plist << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -60,41 +52,24 @@ jobs:
     <string>1.0.0</string>
     <key>CFBundleExecutable</key>
     <string>App</string>
-    <key>UILaunchStoryboardName</key>
-    <string>LaunchScreen</string>
-    <key>UIMainStoryboardFile</key>
-    <string>Main</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    <key>UIRequiredDeviceCapabilities</key>
-    <array>
-        <string>armv7</string>
-    </array>
-    <key>UISupportedInterfaceOrientations</key>
-    <array>
-        <string>UIInterfaceOrientationPortrait</string>
-    </array>
 </dict>
 </plist>
 EOF
         
-        # Copier tous les fichiers web
-        cp -r ../../www/* Payload/App.app/ 2>/dev/null || true
-        
-        # Créer un fichier launchscreen (optionnel)
-        mkdir -p Payload/App.app/Base.lproj
-        echo '<?xml version="1.0" encoding="UTF-8"?>' > Payload/App.app/Base.lproj/LaunchScreen.storyboard
-        echo '<!-- Fake launch screen -->' >> Payload/App.app/Base.lproj/LaunchScreen.storyboard
+        # Créer un exécutable vide (requis)
+        echo '#!/bin/bash' > Payload/MyApp.app/App
+        chmod +x Payload/MyApp.app/App
         
         # Créer l'IPA
-        zip -qr MonTracker.ipa Payload
+        zip -qr MyApp.ipa Payload
         
-        echo "IPA créé avec succès!"
-        ls -lh MonTracker.ipa
+        echo "✅ IPA créé avec succès !"
+        ls -lh MyApp.ipa
         
     - name: Upload IPA
       uses: actions/upload-artifact@v4
       with:
         name: iOS-App
-        path: ios/App/MonTracker.ipa
-        retention-days: 7
+        path: MyApp.ipa
