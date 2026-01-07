@@ -1,0 +1,67 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Show files
+      run: |
+        echo "=== FILES IN REPOSITORY ==="
+        ls -la
+        echo ""
+        echo "=== FILES IN WWW ==="
+        ls -la www/
+        
+    - name: Create IPA
+      run: |
+        # Create app structure
+        mkdir -p Payload/MyApp.app
+        
+        # Copy web files
+        cp -r www/* Payload/MyApp.app/
+        
+        # Create Info.plist
+        cat > Payload/MyApp.app/Info.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>Mon Tracker</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.ethan.tracker</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleExecutable</key>
+    <string>App</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+</dict>
+</plist>
+EOF
+        
+        # Create empty executable
+        echo '#!/bin/bash' > Payload/MyApp.app/App
+        echo 'echo "App started"' >> Payload/MyApp.app/App
+        chmod +x Payload/MyApp.app/App
+        
+        # Create IPA
+        zip -qr app.ipa Payload
+        echo "✅ IPA created successfully!"
+        ls -lh app.ipa
+        
+    - name: Upload IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: iOS-App
+        path: app.ipa
