@@ -9,27 +9,23 @@ jobs:
     runs-on: macos-latest
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-    - name: Show files
-      run: |
-        echo "=== FILES IN REPOSITORY ==="
-        ls -la
-        echo ""
-        echo "=== FILES IN WWW ==="
-        ls -la www/
-        
-    - name: Create IPA
-      run: |
-        # Create app structure
-        mkdir -p Payload/MyApp.app
-        
-        # Copy web files
-        cp -r www/* Payload/MyApp.app/
-        
-        # Create Info.plist
-        cat > Payload/MyApp.app/Info.plist << 'EOF'
+      - name: Debug files
+        run: |
+          echo "=== Files in repository ==="
+          ls -la
+          echo ""
+          echo "=== Files in www/ ==="
+          ls -la www/
+      
+      - name: Create IPA structure
+        run: |
+          mkdir -p Payload/MyApp.app
+          cp -r www/* Payload/MyApp.app/
+          
+          cat > Payload/MyApp.app/Info.plist << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -49,19 +45,16 @@ jobs:
 </dict>
 </plist>
 EOF
-        
-        # Create empty executable
-        echo '#!/bin/bash' > Payload/MyApp.app/App
-        echo 'echo "App started"' >> Payload/MyApp.app/App
-        chmod +x Payload/MyApp.app/App
-        
-        # Create IPA
-        zip -qr app.ipa Payload
-        echo "✅ IPA created successfully!"
-        ls -lh app.ipa
-        
-    - name: Upload IPA
-      uses: actions/upload-artifact@v4
-      with:
-        name: iOS-App
-        path: app.ipa
+          
+          echo '#!/bin/bash' > Payload/MyApp.app/App
+          chmod +x Payload/MyApp.app/App
+          
+          zip -qr app.ipa Payload
+          echo "IPA created: app.ipa"
+          ls -lh app.ipa
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iOS-App
+          path: app.ipa
