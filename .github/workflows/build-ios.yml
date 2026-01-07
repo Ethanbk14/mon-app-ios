@@ -1,42 +1,36 @@
-name: Build iOS App
+name: Build iOS IPA
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-ios:
+  build:
     runs-on: macos-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: List files
+    - uses: actions/checkout@v4
+    
+    - name: Debug - List files
       run: |
-        echo "Contenu du dépôt :"
+        echo "=== ROOT ==="
         ls -la
         echo ""
-        echo "Contenu de www (s'il existe) :"
-        ls -la www/ 2>/dev/null || echo "Dossier www non trouvé"
-        
-    - name: Create simple IPA
+        echo "=== WWW ==="
+        ls -la www/
+        echo ""
+        echo "=== WORKFLOWS ==="
+        ls -la .github/workflows/
+    
+    - name: Create IPA structure
       run: |
-        # Créer la structure de base
+        # Créer structure
         mkdir -p Payload/MyApp.app
         
-        # Vérifier que www existe et le copier
-        if [ -d "www" ]; then
-          echo "Copie des fichiers depuis www/"
-          cp -r www/* Payload/MyApp.app/
-        else
-          echo "ERREUR: Aucun dossier www trouvé !"
-          echo "Fichiers disponibles :"
-          ls -la
-          exit 1
-        fi
+        # Copier fichiers web
+        cp -r www/* Payload/MyApp.app/
         
-        # Créer le fichier Info.plist minimal
+        # Créer Info.plist
         cat > Payload/MyApp.app/Info.plist << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -49,7 +43,7 @@ jobs:
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>1.0</string>
     <key>CFBundleExecutable</key>
     <string>App</string>
     <key>LSRequiresIPhoneOS</key>
@@ -58,18 +52,17 @@ jobs:
 </plist>
 EOF
         
-        # Créer un exécutable vide (requis)
+        # Créer exécutable vide
         echo '#!/bin/bash' > Payload/MyApp.app/App
         chmod +x Payload/MyApp.app/App
         
-        # Créer l'IPA
-        zip -qr MyApp.ipa Payload
-        
-        echo "✅ IPA créé avec succès !"
-        ls -lh MyApp.ipa
-        
-    - name: Upload IPA
+        # Créer IPA
+        zip -qr myapp.ipa Payload
+        echo "✅ IPA created: myapp.ipa"
+        ls -lh myapp.ipa
+    
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: iOS-App
-        path: MyApp.ipa
+        name: iOS-IPA
+        path: myapp.ipa
